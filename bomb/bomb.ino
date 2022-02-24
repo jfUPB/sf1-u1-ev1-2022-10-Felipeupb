@@ -10,10 +10,11 @@ SSD1306Wire display(0x3c, SDA, SCL, GEOMETRY_64_48);
 
 void btnsTask();
 void bombTask();
+void serialTask();
 
 void setup() {
   Serial.begin(115200);
-  
+
   btnsTask();
   bombTask();
 
@@ -24,6 +25,7 @@ bool evBtns = false;
 uint8_t evBtnsData = 0;
 
 void loop() {
+  serialTask();
   btnsTask();
   bombTask();
 }
@@ -111,6 +113,19 @@ void bombTask() {
       }
     case BombStates::DISARMED: {
 
+        if (evBtns == true) {
+          evBtns = false;
+          if (evBtnsData == UP_BTN ) {
+            if (counter < 60) {
+              counter++;
+            }
+            display.clear();
+            display.drawString(10, 20, String(counter));
+            display.display();
+          }
+
+        }
+
         break;
       }
 
@@ -127,4 +142,14 @@ void bombTask() {
 
 
 
+}
+
+void serialTask() {
+  if (Serial.available() > 0) {
+    int dataIn = Serial.read();
+    if (dataIn == 'u') {
+      evBtns = true;
+      evBtnsData = UP_BTN;
+    }
+  }
 }
