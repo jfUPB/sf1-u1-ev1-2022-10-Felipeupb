@@ -12,6 +12,8 @@ void btnsTask();
 void bombTask();
 
 void setup() {
+  Serial.begin(115200);
+  
   btnsTask();
   bombTask();
 
@@ -27,7 +29,61 @@ void loop() {
 }
 
 void btnsTask() {
+  enum class BtnsStates {INIT, PRESS, STABLE, RELEASE};
+  static BtnsStates btnsState =  BtnsStates::INIT;
+  static uint32_t referenceTime;
 
+  const uint32_t STABLETIMEOUT = 100;
+
+  switch (btnsState) {
+    case BtnsStates::INIT: {
+
+        pinMode(UP_BTN, INPUT_PULLUP);
+
+        btnsState = BtnsStates::PRESS;
+
+
+        break;
+      }
+    case BtnsStates::PRESS: {
+
+        if (digitalRead(UP_BTN) == LOW) {
+          referenceTime = millis();
+          btnsState = BtnsStates::STABLE;
+        }
+
+        break;
+      }
+
+    case BtnsStates::STABLE: {
+
+        if (digitalRead(UP_BTN) == HIGH) {
+          btnsState = BtnsStates::PRESS;
+        }
+        else if ( (millis() - referenceTime) >= STABLETIMEOUT) {
+          btnsState = BtnsStates::RELEASE;
+        }
+
+        break;
+      }
+
+    case BtnsStates::RELEASE: {
+
+        if (digitalRead(UP_BTN) == HIGH) {
+          evBtns = true;
+          evBtnsData = UP_BTN;
+          Serial.println("UP_BTN");
+          btnsState = BtnsStates::PRESS;
+        }
+
+        break;
+      }
+
+    default:
+      break;
+
+
+  }
 }
 
 void bombTask() {
@@ -37,6 +93,8 @@ void bombTask() {
 
   switch (bombState) {
     case BombStates::INIT: {
+
+
         counter = 20;
         display.init();
         display.setContrast(255);
@@ -45,7 +103,7 @@ void bombTask() {
         display.setFont(ArialMT_Plain_16);
 
         display.clear();
-        display.drawString(10, 20, String(counter));  
+        display.drawString(10, 20, String(counter));
         display.display();
 
         bombState = BombStates::DISARMED;
