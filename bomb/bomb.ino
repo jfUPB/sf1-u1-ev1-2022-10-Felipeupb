@@ -34,6 +34,7 @@ void btnsTask() {
   enum class BtnsStates {INIT, PRESS, STABLE, RELEASE};
   static BtnsStates btnsState =  BtnsStates::INIT;
   static uint32_t referenceTime;
+  static uint8_t btnpr;
 
   const uint32_t STABLETIMEOUT = 100;
 
@@ -41,6 +42,8 @@ void btnsTask() {
     case BtnsStates::INIT: {
 
         pinMode(UP_BTN, INPUT_PULLUP);
+        pinMode(DOWN_BTN, INPUT_PULLUP);
+        pinMode(ARM_BTN, INPUT_PULLUP);
 
         btnsState = BtnsStates::PRESS;
 
@@ -51,15 +54,29 @@ void btnsTask() {
 
         if (digitalRead(UP_BTN) == LOW) {
           referenceTime = millis();
+          btnpr = 1;
           btnsState = BtnsStates::STABLE;
-        }
+        }else if (digitalRead(DOWN_BTN) == LOW) {
+          referenceTime = millis();
+          btnpr = 2;
+          btnsState = BtnsStates::STABLE;
+        } else if (digitalRead(ARM_BTN) == LOW) {
+          referenceTime = millis();
+          btnpr = 3;
+          btnsState = BtnsStates::STABLE;
+        } 
 
         break;
       }
 
     case BtnsStates::STABLE: {
 
-        if (digitalRead(UP_BTN) == HIGH) {
+        if (digitalRead(UP_BTN) == HIGH && btnpr == 1) {
+          btnsState = BtnsStates::PRESS;
+        }
+        else if ( (millis() - referenceTime) >= STABLETIMEOUT) {
+          btnsState = BtnsStates::RELEASE;
+        }else if (digitalRead(DOWN_BTN) == HIGH && btnpr == 2) {
           btnsState = BtnsStates::PRESS;
         }
         else if ( (millis() - referenceTime) >= STABLETIMEOUT) {
@@ -75,6 +92,11 @@ void btnsTask() {
           evBtns = true;
           evBtnsData = UP_BTN;
           Serial.println("UP_BTN");
+          btnsState = BtnsStates::PRESS;
+        }else if (digitalRead(DOWN_BTN) == HIGH) {
+          evBtns = true;
+          evBtnsData = DOWN_BTN;
+          Serial.println("DOWN_BTN");
           btnsState = BtnsStates::PRESS;
         }
 
@@ -118,6 +140,13 @@ void bombTask() {
           if (evBtnsData == UP_BTN ) {
             if (counter < 60) {
               counter++;
+            }
+            display.clear();
+            display.drawString(10, 20, String(counter));
+            display.display();
+          }else if (evBtnsData == DOWN_BTN ) {
+            if (counter < 60) {
+              counter--;
             }
             display.clear();
             display.drawString(10, 20, String(counter));
