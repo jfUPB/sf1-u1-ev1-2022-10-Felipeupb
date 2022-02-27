@@ -24,7 +24,8 @@ void setup() {
 bool evBtns = false;
 uint8_t evBtnsData = 0;
 uint8_t btnpr =0;
-bool st;
+const uint32_t interval = 1000;
+
 
 void loop() {
   serialTask();
@@ -36,6 +37,7 @@ void btnsTask() {
   enum class BtnsStates {INIT, PRESS, STABLE, RELEASE};
   static BtnsStates btnsState =  BtnsStates::INIT;
   static uint32_t referenceTime;
+  
 
   const uint32_t STABLETIMEOUT = 100;
 
@@ -45,6 +47,7 @@ void btnsTask() {
         pinMode(UP_BTN, INPUT_PULLUP);
         pinMode(DOWN_BTN, INPUT_PULLUP);
         pinMode(ARM_BTN, INPUT_PULLUP);
+        
 
         btnsState = BtnsStates::PRESS;
 
@@ -122,21 +125,25 @@ void btnsTask() {
 }
 
 void bombTask() {
+
+  
+  
   enum class BombStates {INIT, DISARMED, ARMED};
   static BombStates bombState =  BombStates::INIT;
   static uint8_t counter;
+  static uint8_t ledState = LOW;
+  static uint32_t previousMillis = 0;
 
   switch (bombState) {
     case BombStates::INIT: {
 
-
+      pinMode(LED_COUNT, OUTPUT);
         counter = 20;
         display.init();
         display.setContrast(255);
         display.clear();
         display.setTextAlignment(TEXT_ALIGN_LEFT);
         display.setFont(ArialMT_Plain_16);
-         st= false;
 
         display.clear();
         display.drawString(10, 20, String(counter));
@@ -146,6 +153,8 @@ void bombTask() {
         break;
       }
     case BombStates::DISARMED: {
+
+      digitalWrite(LED_COUNT, HIGH);
 
         if (evBtns == true) {
           evBtns = false;
@@ -178,7 +187,19 @@ void bombTask() {
       int password[]= {1,1,0,0,1,0}; //UP,UP,DOWN, DOWN, UP, DOWN, ARM = 110010
       int clave[5];
       int j;
-       st=true;
+      bool st=false;
+
+      uint32_t currentMillis = millis();
+      if ( (currentMillis - previousMillis) >= interval) {
+        previousMillis = currentMillis;
+        counter -= counter;
+        if (ledState == LOW) {
+          ledState = HIGH;
+        } else {
+          ledState = LOW;
+        }
+        digitalWrite(LED_COUNT, ledState);
+      }
 
       if (evBtns == true) {
           evBtns = false;
@@ -191,11 +212,13 @@ void bombTask() {
           } 
             
           if ( counter !=0 ){
+            //rxData[dataCounter] = Serial.read();
             for( int i = 0; i < j; i++){
               clave[i];
               Serial.println(i);
             }
             if( clave == password){
+              st = true;
               if (evBtnsData == ARM_BTN && btnpr ==3) {
               bombState = BombStates::DISARMED;
               }
@@ -203,26 +226,18 @@ void bombTask() {
           
           } else if ( counter == 0){
             display.clear();
-            display.drawString(10, 20, String("GAME OVER"));
+            display.drawString(10, 10, String("GAME"));
+            display.drawString(10, 30, String("OVER"));
             display.display();
             Serial.println("Game Over");
             if (evBtnsData == ARM_BTN && btnpr ==3) {
           bombState = BombStates::DISARMED;
           } 
-          
-          
           }
       }
-      /*static uint32_t previousMillis = 0;
-      uint32_t currentMillis = millis();
+    
 
-      if (currentMillis - previousMillis >= interval) {
-        previousMillis = currentMillis;
-        counter = previousMillis;
       
-      }*/
-      
-
         break;
       }
 
