@@ -187,10 +187,12 @@ void bombTask() {
       int password[]= {1,1,0,0,1,0}; //UP,UP,DOWN, DOWN, UP, DOWN, ARM = 110010
       int clave[5];
       bool st;
-      bool comar;
+      bool pstrue;
 
       uint32_t currentMillis = millis();
-      if ( (currentMillis - previousMillis) >= interval) {
+      
+        if ( counter !=255 ){
+          if ( (currentMillis - previousMillis) >= interval) {
         previousMillis = currentMillis;
         counter --;
         display.clear();
@@ -202,7 +204,6 @@ void bombTask() {
             ledState = LOW;
           }
         digitalWrite(LED_COUNT, ledState);
-        if ( counter !=0 ){
            if (evBtns == true) {
             evBtns = false;
             if (evBtnsData == UP_BTN && btnpr ==1 ) {
@@ -217,26 +218,35 @@ void bombTask() {
               //clave[i];
               //Serial.println(i);
            // }
-            if( clave == password){
+            if( pstrue == true){
+              Serial.println("correct password");
+              if (evBtns == true) {
+                evBtns = false;
               if (evBtnsData == ARM_BTN && btnpr ==3) {
-              bombState = BombStates::DISARMED;
-              comar = true;
-              }else{
-                comar = false;
+              bombState = BombStates::INIT; 
               }
             }
-          
-          } else if ( counter >= 255){
+           }else if( pstrue == false){
+            // array = 0
+            Serial.println("incorrect password");
+           }
+          } 
+         }
+        }else if ( counter == 255){
             display.clear();
             display.drawString(10, 10, String("GAME"));
             display.drawString(10, 30, String("OVER"));
             display.display();
             Serial.println("Game Over");
             digitalWrite(LED_COUNT, HIGH);
-            bombState = BombStates::DISARMED;
-          }
-        }    
-      }
+            if (evBtns == true) {
+            evBtns = false;
+            if (evBtnsData == ARM_BTN && btnpr ==3) {
+            bombState = BombStates::INIT;
+            }
+           }
+          }   
+        
     
 
       
