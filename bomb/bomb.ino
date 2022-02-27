@@ -24,6 +24,7 @@ void setup() {
 bool evBtns = false;
 uint8_t evBtnsData = 0;
 uint8_t btnpr =0;
+bool st;
 
 void loop() {
   serialTask();
@@ -135,6 +136,7 @@ void bombTask() {
         display.clear();
         display.setTextAlignment(TEXT_ALIGN_LEFT);
         display.setFont(ArialMT_Plain_16);
+         st= false;
 
         display.clear();
         display.drawString(10, 20, String(counter));
@@ -175,23 +177,28 @@ void bombTask() {
     case BombStates::ARMED: {
       int password[]= {1,1,0,0,1,0}; //UP,UP,DOWN, DOWN, UP, DOWN, ARM = 110010
       int clave[5];
-      int i;
+      int j;
+       st=true;
 
       if (evBtns == true) {
           evBtns = false;
           if (evBtnsData == UP_BTN && btnpr ==1 ) {
-            i = 1;
-          }else if (evBtnsData == DOWN_BTN && btnpr ==2 ) {
-            i = 0;
-          }else if (evBtnsData == ARM_BTN && btnpr ==3) {
+            j = 1;
+            Serial.println(j);
+          }else if (evBtnsData == DOWN_BTN && btnpr ==2 ){
+            j = 0;
+            Serial.println(j);
+          } 
             
-          if ( counter !=0 )
-          {
-            for( int i = 0; i < 5; i++){
+          if ( counter !=0 ){
+            for( int i = 0; i < j; i++){
               clave[i];
+              Serial.println(i);
             }
             if( clave == password){
+              if (evBtnsData == ARM_BTN && btnpr ==3) {
               bombState = BombStates::DISARMED;
+              }
             }
           
           } else if ( counter == 0){
@@ -202,7 +209,7 @@ void bombTask() {
             if (evBtnsData == ARM_BTN && btnpr ==3) {
           bombState = BombStates::DISARMED;
           } 
-          }
+          
           
           }
       }
