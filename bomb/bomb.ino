@@ -23,6 +23,7 @@ void setup() {
 // Eventos para comunicar
 bool evBtns = false;
 uint8_t evBtnsData = 0;
+uint8_t btnpr =0;
 
 void loop() {
   serialTask();
@@ -34,7 +35,6 @@ void btnsTask() {
   enum class BtnsStates {INIT, PRESS, STABLE, RELEASE};
   static BtnsStates btnsState =  BtnsStates::INIT;
   static uint32_t referenceTime;
-  static uint8_t btnpr;
 
   const uint32_t STABLETIMEOUT = 100;
 
@@ -53,16 +53,16 @@ void btnsTask() {
     case BtnsStates::PRESS: {
 
         if (digitalRead(UP_BTN) == LOW) {
-          referenceTime = millis();
           btnpr = 1;
-          btnsState = BtnsStates::STABLE;
-        }else if (digitalRead(DOWN_BTN) == LOW) {
           referenceTime = millis();
+          btnsState = BtnsStates::STABLE;
+        } else if(digitalRead(DOWN_BTN) == LOW) {
           btnpr = 2;
+          referenceTime = millis();
           btnsState = BtnsStates::STABLE;
         } else if (digitalRead(ARM_BTN) == LOW) {
-          referenceTime = millis();
           btnpr = 3;
+          referenceTime = millis();
           btnsState = BtnsStates::STABLE;
         } 
 
@@ -71,12 +71,17 @@ void btnsTask() {
 
     case BtnsStates::STABLE: {
 
-        if (digitalRead(UP_BTN) == HIGH && btnpr == 1) {
+        if (digitalRead(UP_BTN) == HIGH&& btnpr ==1) {
           btnsState = BtnsStates::PRESS;
         }
         else if ( (millis() - referenceTime) >= STABLETIMEOUT) {
           btnsState = BtnsStates::RELEASE;
-        }else if (digitalRead(DOWN_BTN) == HIGH && btnpr == 2) {
+        }if (digitalRead(DOWN_BTN) == HIGH&& btnpr ==2) {
+          btnsState = BtnsStates::PRESS;
+        }
+        else if ( (millis() - referenceTime) >= STABLETIMEOUT) {
+          btnsState = BtnsStates::RELEASE;
+        }else if (digitalRead(ARM_BTN) == HIGH&& btnpr ==3) {
           btnsState = BtnsStates::PRESS;
         }
         else if ( (millis() - referenceTime) >= STABLETIMEOUT) {
@@ -88,15 +93,20 @@ void btnsTask() {
 
     case BtnsStates::RELEASE: {
 
-        if (digitalRead(UP_BTN) == HIGH) {
+        if (digitalRead(UP_BTN) == HIGH && btnpr ==1) {
           evBtns = true;
           evBtnsData = UP_BTN;
           Serial.println("UP_BTN");
           btnsState = BtnsStates::PRESS;
-        }else if (digitalRead(DOWN_BTN) == HIGH) {
+        }else if (digitalRead(DOWN_BTN) == HIGH && btnpr ==2) {
           evBtns = true;
           evBtnsData = DOWN_BTN;
           Serial.println("DOWN_BTN");
+          btnsState = BtnsStates::PRESS;
+        }else if (digitalRead(ARM_BTN) == HIGH && btnpr ==3) {
+          evBtns = true;
+          evBtnsData = ARM_BTN;
+          Serial.println("ARM_BTN");
           btnsState = BtnsStates::PRESS;
         }
 
@@ -137,21 +147,23 @@ void bombTask() {
 
         if (evBtns == true) {
           evBtns = false;
-          if (evBtnsData == UP_BTN ) {
+          if (evBtnsData == UP_BTN && btnpr ==1 ) {
             if (counter < 60) {
               counter++;
             }
             display.clear();
             display.drawString(10, 20, String(counter));
             display.display();
-          }else if (evBtnsData == DOWN_BTN ) {
+          }else if (evBtnsData == DOWN_BTN && btnpr ==2 ) {
             if (counter < 60) {
               counter--;
             }
             display.clear();
             display.drawString(10, 20, String(counter));
             display.display();
-          }
+          }else if (evBtnsData == ARM_BTN && btnpr ==3) {
+          bombState = BombStates::ARMED;
+        }
 
         }
 
