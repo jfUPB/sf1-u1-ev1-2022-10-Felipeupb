@@ -157,13 +157,15 @@ void bombTask() {
           }else if (evBtnsData == DOWN_BTN && btnpr ==2 ) {
             if (counter < 60) {
               counter--;
+            }else if (counter > 1){
+              evBtnsData = 0;
             }
             display.clear();
             display.drawString(10, 20, String(counter));
             display.display();
           }else if (evBtnsData == ARM_BTN && btnpr ==3) {
           bombState = BombStates::ARMED;
-        }
+          } 
 
         }
 
@@ -171,6 +173,48 @@ void bombTask() {
       }
 
     case BombStates::ARMED: {
+      int password[]= {1,1,0,0,1,0}; //UP,UP,DOWN, DOWN, UP, DOWN, ARM = 110010
+      int clave[5];
+      int i;
+
+      if (evBtns == true) {
+          evBtns = false;
+          if (evBtnsData == UP_BTN && btnpr ==1 ) {
+            i = 1;
+          }else if (evBtnsData == DOWN_BTN && btnpr ==2 ) {
+            i = 0;
+          }else if (evBtnsData == ARM_BTN && btnpr ==3) {
+            
+          if ( counter !=0 )
+          {
+            for( int i = 0; i < 5; i++){
+              clave[i];
+            }
+            if( clave == password){
+              bombState = BombStates::DISARMED;
+            }
+          
+          } else if ( counter == 0){
+            display.clear();
+            display.drawString(10, 20, String("GAME OVER"));
+            display.display();
+            Serial.println("Game Over");
+            if (evBtnsData == ARM_BTN && btnpr ==3) {
+          bombState = BombStates::DISARMED;
+          } 
+          }
+          
+          }
+      }
+      /*static uint32_t previousMillis = 0;
+      uint32_t currentMillis = millis();
+
+      if (currentMillis - previousMillis >= interval) {
+        previousMillis = currentMillis;
+        counter = previousMillis;
+      
+      }*/
+      
 
         break;
       }
