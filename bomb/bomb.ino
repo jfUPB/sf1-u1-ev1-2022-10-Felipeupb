@@ -1,7 +1,10 @@
 #include "SSD1306Wire.h"
 
 #define BOMB_OUT 25
-#define LED_COUNT 26
+#define LED_COUNT 25
+#define LED_COUNT1 26
+#define LED_COUNT2 27
+#define LED_COUNT3 14
 #define UP_BTN 13
 #define DOWN_BTN 32
 #define ARM_BTN 33
@@ -37,6 +40,7 @@ void btnsTask() {
   enum class BtnsStates {INIT, PRESS, STABLE, RELEASE};
   static BtnsStates btnsState =  BtnsStates::INIT;
   static uint32_t referenceTime;
+  static uint8_t ledState = LOW;
   
 
   const uint32_t STABLETIMEOUT = 100;
@@ -47,6 +51,10 @@ void btnsTask() {
         pinMode(UP_BTN, INPUT_PULLUP);
         pinMode(DOWN_BTN, INPUT_PULLUP);
         pinMode(ARM_BTN, INPUT_PULLUP);
+        pinMode(LED_COUNT, OUTPUT);
+        pinMode(LED_COUNT1, OUTPUT);
+        pinMode(LED_COUNT2, OUTPUT);
+        pinMode(LED_COUNT3, OUTPUT);
         
 
         btnsState = BtnsStates::PRESS;
@@ -102,16 +110,29 @@ void btnsTask() {
           evBtnsData = UP_BTN;
           Serial.println("UP_BTN");
           btnsState = BtnsStates::PRESS;
+          digitalWrite(LED_COUNT, HIGH);
+          delay(300); // Wait for 1000 millisecond(s)
+          digitalWrite(LED_COUNT, LOW);
+          delay(300);
+                
         }else if (digitalRead(DOWN_BTN) == HIGH && btnpr ==2) {
           evBtns = true;
           evBtnsData = DOWN_BTN;
           Serial.println("DOWN_BTN");
           btnsState = BtnsStates::PRESS;
+          digitalWrite(LED_COUNT1, HIGH);
+          delay(300); // Wait for 1000 millisecond(s)
+          digitalWrite(LED_COUNT1, LOW);
+          delay(300);
         }else if (digitalRead(ARM_BTN) == HIGH && btnpr ==3) {
           evBtns = true;
           evBtnsData = ARM_BTN;
           Serial.println("ARM_BTN");
           btnsState = BtnsStates::PRESS;
+          digitalWrite(LED_COUNT2, HIGH);
+          delay(300); // Wait for 1000 millisecond(s)
+          digitalWrite(LED_COUNT2, LOW);
+          delay(300);
         }
 
         break;
@@ -137,7 +158,7 @@ void bombTask() {
   switch (bombState) {
     case BombStates::INIT: {
 
-      pinMode(LED_COUNT, OUTPUT);
+      pinMode(LED_COUNT3, OUTPUT);
         counter = 20;
         display.init();
         display.setContrast(255);
@@ -148,13 +169,17 @@ void bombTask() {
         display.clear();
         display.drawString(10, 20, String(counter));
         display.display();
+        digitalWrite(LED_COUNT, LOW);
+        digitalWrite(LED_COUNT1, LOW);
+        digitalWrite(LED_COUNT2, LOW);
+        digitalWrite(LED_COUNT3, LOW);
 
         bombState = BombStates::DISARMED;
         break;
       }
     case BombStates::DISARMED: {
 
-      digitalWrite(LED_COUNT, HIGH);
+      digitalWrite(LED_COUNT3, HIGH);
 
         if (evBtns == true) {
           evBtns = false;
@@ -205,7 +230,7 @@ void bombTask() {
               } else {
                 ledState = LOW;
               }
-             digitalWrite(LED_COUNT, ledState);
+             digitalWrite(LED_COUNT3, ledState);
              if (evBtns == true) {
               evBtns = false;
               if (evBtnsData == UP_BTN && btnpr ==1 ) {
@@ -261,6 +286,9 @@ void bombTask() {
               display.display();
              // Serial.println("Game Over");
               digitalWrite(LED_COUNT, HIGH);
+              digitalWrite(LED_COUNT1, HIGH);
+              digitalWrite(LED_COUNT2, HIGH);
+              digitalWrite(LED_COUNT3, HIGH);
               if (evBtns == true) {
               evBtns = false;
               if (evBtnsData == ARM_BTN && btnpr ==3) {
