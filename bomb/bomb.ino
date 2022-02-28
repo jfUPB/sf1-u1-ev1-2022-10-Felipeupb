@@ -167,7 +167,7 @@ void bombTask() {
         display.setFont(ArialMT_Plain_16);
 
         display.clear();
-        display.drawString(10, 20, String(counter));
+        display.drawString(20, 15, String(counter));
         display.display();
         digitalWrite(LED_COUNT, LOW);
         digitalWrite(LED_COUNT1, LOW);
@@ -188,14 +188,14 @@ void bombTask() {
               counter++;
             }
             display.clear();
-            display.drawString(10, 20, String(counter));
+            display.drawString(20, 15, String(counter));
             display.display();
           }else if (evBtnsData == DOWN_BTN && btnpr ==2 ) {
             if (counter > 10) {
               counter--;
             }
             display.clear();
-            display.drawString(10, 20, String(counter));
+            display.drawString(20, 15, String(counter));
             display.display();
           }else if (evBtnsData == ARM_BTN && btnpr ==3) {
           bombState = BombStates::ARMED;
@@ -223,7 +223,7 @@ void bombTask() {
             previousMillis = currentMillis;
             counter --;
             display.clear();
-            display.drawString(10, 20, String(counter));
+            display.drawString(20, 15, String(counter));
             display.display();
               if (ledState == LOW) {
                 ledState = HIGH;
@@ -241,9 +241,8 @@ void bombTask() {
                 Serial.println(st);
               } 
                for( int i = 0; i < j; i++){
-                clave[i];
                 if(Serial.available() < 0){
-                  st = Serial.parseInt();
+                  clave[i];
               } if(i== 6){
               Serial.println(clave[i]);
               
@@ -281,6 +280,10 @@ void bombTask() {
           
           }else if ( counter == 255){
               display.clear();
+              display.drawString(10, 20, String("BOOM!"));
+              display.display();
+              delay(1000);
+              display.clear();
               display.drawString(10, 10, String("GAME"));
               display.drawString(9, 30, String("OVER!"));
               display.display();
@@ -289,12 +292,10 @@ void bombTask() {
               digitalWrite(LED_COUNT1, HIGH);
               digitalWrite(LED_COUNT2, HIGH);
               digitalWrite(LED_COUNT3, HIGH);
-              if (evBtns == true) {
-              evBtns = false;
-              if (evBtnsData == ARM_BTN && btnpr ==3) {
+              delay(1500);
               bombState = BombStates::INIT;
-              }
-             }
+              
+             
           }  
         
     
