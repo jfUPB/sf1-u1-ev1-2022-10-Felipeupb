@@ -184,68 +184,83 @@ void bombTask() {
       }
 
     case BombStates::ARMED: {
-      int password[]= {1,1,0,0,1,0}; //UP,UP,DOWN, DOWN, UP, DOWN, ARM = 110010
-      int clave[5];
-      bool st;
-      bool pstrue;
+      static int password[]= {1,1,0,0,1,0}; //UP,UP,DOWN, DOWN, UP, DOWN, ARM = 110010
+      static int clave[6];
+      static uint8_t st;
+      static bool pstrue;
+      uint8_t j=0;
+      
 
       uint32_t currentMillis = millis();
       
         if ( counter !=255 ){
           if ( (currentMillis - previousMillis) >= interval) {
-        previousMillis = currentMillis;
-        counter --;
-        display.clear();
-        display.drawString(10, 20, String(counter));
-        display.display();
-          if (ledState == LOW) {
-            ledState = HIGH;
-          } else {
-            ledState = LOW;
-          }
-        digitalWrite(LED_COUNT, ledState);
-           if (evBtns == true) {
-            evBtns = false;
-            if (evBtnsData == UP_BTN && btnpr ==1 ) {
-              st = true;
-              
-            }else if (evBtnsData == DOWN_BTN && btnpr ==2 ){
-              st = false;
-              
-            } 
-            //rxData[dataCounter] = Serial.read();
-            //for( int i = 0; i < j; i++){
-              //clave[i];
-              //Serial.println(i);
-           // }
-            if( pstrue == true){
-              Serial.println("correct password");
-              if (evBtns == true) {
-                evBtns = false;
-              if (evBtnsData == ARM_BTN && btnpr ==3) {
-              bombState = BombStates::INIT; 
-              }
-            }
-           }else if( pstrue == false){
-            // array = 0
-            Serial.println("incorrect password");
-           }
-          } 
-         }
-        }else if ( counter == 255){
+            previousMillis = currentMillis;
+            counter --;
             display.clear();
-            display.drawString(10, 10, String("GAME"));
-            display.drawString(10, 30, String("OVER"));
+            display.drawString(10, 20, String(counter));
             display.display();
-            Serial.println("Game Over");
-            digitalWrite(LED_COUNT, HIGH);
-            if (evBtns == true) {
-            evBtns = false;
-            if (evBtnsData == ARM_BTN && btnpr ==3) {
-            bombState = BombStates::INIT;
+              if (ledState == LOW) {
+                ledState = HIGH;
+              } else {
+                ledState = LOW;
+              }
+             digitalWrite(LED_COUNT, ledState);
+             if (evBtns == true) {
+              evBtns = false;
+              if (evBtnsData == UP_BTN && btnpr ==1 ) {
+                st = 1;
+                Serial.println(st);
+              }else if (evBtnsData == DOWN_BTN && btnpr ==2 ){
+                st = 0;
+                Serial.println(st);
+              } 
+               for( int i = 0; i < j; i++){
+                 clave[i] = clave[st];
+                 pinMode( clave[i], INPUT );
+                Serial.println(i);
+              }
+              if(j > 0){
+                clave[st] = Serial.read();
+              }if(j == 6){
+                j=0;
+                //Serial.println(i);
+              }
+                if (evBtns == true) {
+                  evBtns = false;
+                if (evBtnsData == ARM_BTN && btnpr ==3) {
+                 if(clave == password){
+                    pstrue = true;
+                  }else{
+                    pstrue = false;
+                  }  if( pstrue == true){
+                Serial.println("correct password");
+                bombState = BombStates::INIT; 
+             }else if( pstrue == false){
+               memset(clave, 0, j);
+              Serial.println("incorrect password");
+             }
             }
-           }
-          }   
+             
+                }
+              }
+              }
+              
+          
+          }else if ( counter == 255){
+              display.clear();
+              display.drawString(10, 10, String("GAME"));
+              display.drawString(9, 30, String("OVER!"));
+              display.display();
+             // Serial.println("Game Over");
+              digitalWrite(LED_COUNT, HIGH);
+              if (evBtns == true) {
+              evBtns = false;
+              if (evBtnsData == ARM_BTN && btnpr ==3) {
+              bombState = BombStates::INIT;
+              }
+             }
+          }  
         
     
 
@@ -262,6 +277,7 @@ void bombTask() {
 
 
 }
+
 
 void serialTask() {
   if (Serial.available() > 0) {
