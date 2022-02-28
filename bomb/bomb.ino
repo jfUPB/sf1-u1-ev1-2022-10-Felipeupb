@@ -282,16 +282,16 @@ void bombTask() {
               display.clear();
               display.drawString(10, 20, String("BOOM!"));
               display.display();
+              digitalWrite(LED_COUNT, HIGH);
+              digitalWrite(LED_COUNT1, HIGH);
+              digitalWrite(LED_COUNT2, HIGH);
+              digitalWrite(LED_COUNT3, HIGH);
               delay(1000);
               display.clear();
               display.drawString(10, 10, String("GAME"));
               display.drawString(9, 30, String("OVER!"));
               display.display();
              // Serial.println("Game Over");
-              digitalWrite(LED_COUNT, HIGH);
-              digitalWrite(LED_COUNT1, HIGH);
-              digitalWrite(LED_COUNT2, HIGH);
-              digitalWrite(LED_COUNT3, HIGH);
               delay(1500);
               bombState = BombStates::INIT;
               
