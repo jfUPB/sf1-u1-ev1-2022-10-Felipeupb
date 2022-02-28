@@ -166,10 +166,8 @@ void bombTask() {
             display.drawString(10, 20, String(counter));
             display.display();
           }else if (evBtnsData == DOWN_BTN && btnpr ==2 ) {
-            if (counter < 60) {
+            if (counter > 10) {
               counter--;
-            }else if (counter > 1){
-              evBtnsData = 0;
             }
             display.clear();
             display.drawString(10, 20, String(counter));
@@ -184,11 +182,13 @@ void bombTask() {
       }
 
     case BombStates::ARMED: {
-      static int password[]= {1,1,0,0,1,0}; //UP,UP,DOWN, DOWN, UP, DOWN, ARM = 110010
-      static int clave[6];
-      static uint8_t st;
+      static int password[]= {1,1,2,2,1,2}; //UP,UP,DOWN, DOWN, UP, DOWN, ARM = 112212
+      static int j=6;
+      static uint8_t st = 0;
+      int clave[j];
+      
       static bool pstrue;
-      uint8_t j=0;
+      
       
 
       uint32_t currentMillis = millis();
@@ -212,22 +212,23 @@ void bombTask() {
                 st = 1;
                 Serial.println(st);
               }else if (evBtnsData == DOWN_BTN && btnpr ==2 ){
-                st = 0;
+                st = 2;
                 Serial.println(st);
               } 
                for( int i = 0; i < j; i++){
-                 clave[i] = clave[st];
-                 pinMode( clave[i], INPUT );
-                Serial.println(i);
-              }
-              if(j > 0){
-                clave[st] = Serial.read();
-              }if(j == 6){
-                j=0;
-                //Serial.println(i);
-              }
-                if (evBtns == true) {
+                clave[i];
+                if(Serial.available() < 0){
+                  st = Serial.parseInt();
+              } if(i== 6){
+              Serial.println(clave[i]);
+              
+               if (evBtns == true) {
                   evBtns = false;
+                 if (evBtnsData == UP_BTN && btnpr ==1 ) {
+                   evBtns = false;
+                }else if (evBtnsData == DOWN_BTN && btnpr ==2 ){
+                  evBtns = false;
+                } 
                 if (evBtnsData == ARM_BTN && btnpr ==3) {
                  if(clave == password){
                     pstrue = true;
@@ -240,10 +241,16 @@ void bombTask() {
                memset(clave, 0, j);
               Serial.println("incorrect password");
              }
+             Serial.println(clave[st,i]);
             }
              
                 }
               }
+               }
+            
+              }
+               
+               
               }
               
           
@@ -285,6 +292,9 @@ void serialTask() {
     if (dataIn == 'u') {
       evBtns = true;
       evBtnsData = UP_BTN;
+    }else if (dataIn == 'd') {
+      evBtns = true;
+      evBtnsData = DOWN_BTN;
     }
   }
 }
