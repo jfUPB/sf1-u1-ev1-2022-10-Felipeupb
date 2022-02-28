@@ -208,7 +208,7 @@ void bombTask() {
 
     case BombStates::ARMED: {
       static uint8_t password[]= {1,1,2,2,1,2}; //UP,UP,DOWN, DOWN, UP, DOWN, ARM = 112212
-      uint8_t j=6;
+      static uint8_t j=6;
       static uint8_t st = 0;
        uint8_t clave[6];
        uint8_t cuntas= 0;
@@ -232,65 +232,48 @@ void bombTask() {
                 ledState = LOW;
               }
              digitalWrite(LED_COUNT3, ledState);
-             
-              for( int i = 0; i < j; i++){
-                
-                if (evBtns == true) {
+             if (evBtns == true) {
                   evBtns = false;
+             for( int i = 0; i < 6; i++){
+                clave[i]= st;
+                
                   if (evBtnsData == UP_BTN && btnpr ==1 ) {
                   st = 1;
-                clave[i]= st;
+                //clave[i]= st;
                   if(Serial.available() < 0){
                     clave[i] = Serial.read();
-                  
-                  
-                   Serial.println(st);
-                  Serial.println(clave[i]);} 
-                  
-                  Serial.println(st);
-                  Serial.println(clave[i]);
+                    
+                  } 
+                  //Serial.println(clave[i]);
                 } else if (evBtnsData == DOWN_BTN && btnpr ==2 ){
                   st = 2;
-                clave[i]= st;
+               //clave[i]= st;
                   if(Serial.available() < 0){
                     clave[i] = Serial.read();
-                  i++;
-                   Serial.println(st);
-                  Serial.println(clave[i]);} 
-                  
-                  Serial.println(st);
-                  Serial.println(clave[i]); 
+                  } 
+                 // Serial.println(clave[i]); 
                 }
-
-              else if(i==6){
-              Serial.println(clave[i]);
-              
-               if (evBtns == true) {
-                  evBtns = false;
-                 if (evBtnsData == UP_BTN && btnpr ==1 ) {
-                   evBtns = false;
-                }else if (evBtnsData == DOWN_BTN && btnpr ==2 ){
-                  evBtns = false;
-                } 
-                if (evBtnsData == ARM_BTN && btnpr ==3) {
-                 if(clave == password){
-                    pstrue = true;
-                  }else{
-                    pstrue = false;
-                  }  if( pstrue == true){
-                Serial.println("correct password");
-                bombState = BombStates::INIT; 
-             }else if( pstrue == false){
-               memset(clave, 0, j);
-              Serial.println("incorrect password");
+                Serial.println(clave[i]); 
+                i++;
+                if(i==6){
+                  
+                    if (evBtnsData == ARM_BTN && btnpr ==3) {
+                     if(clave == password){
+                        pstrue = true;
+                      }else{
+                        pstrue = false;
+                      }  if( pstrue == true){
+                    Serial.println("correct password");
+                    bombState = BombStates::INIT; 
+                 }else if( pstrue == false){
+                   memset(clave, 0, j);
+                  Serial.println("incorrect password");
+                }
+               }
+              }
              }
-             Serial.println(clave[st,i]);
-            }  
-           }
-          }
-         }
-        }
-       }       
+            }
+           }       
           }else if ( counter == 255){
               display.clear();
               display.drawString(10, 20, String("BOOM!"));
