@@ -207,12 +207,12 @@ void bombTask() {
       }
 
     case BombStates::ARMED: {
-        static uint8_t password[] = {1, 1, 2, 2, 1, 2, 3}; //UP,UP,DOWN, DOWN, UP, DOWN, ARM = 1122123
-        static uint8_t st = 0;
-        static uint8_t clave[7];
-        static uint8_t cuntas = -1;
+        const uint8_t zise = 7;
+        static uint8_t password[zise] = {UP_BTN, UP_BTN, DOWN_BTN, DOWN_BTN, UP_BTN, DOWN_BTN, ARM_BTN};
+        static uint8_t clave[zise];
+        static uint8_t cuntas = 0;
 
-        static bool pstrue;
+        static bool pstrue = false;
 
 
 
@@ -253,44 +253,50 @@ void bombTask() {
 
         if (evBtns == true) {
           evBtns = false;
-          Serial.println(clave[cuntas]);
+          if (cuntas < zise) {
 
-          clave[cuntas] = st;
-          cuntas++;
-          
-          if (evBtnsData == UP_BTN && btnpr == 1 ) {
-            st = 1;
-          }
-          else if (evBtnsData == DOWN_BTN && btnpr == 2 ) {
-            st = 2;
-          }
-          else if (evBtnsData == ARM_BTN && btnpr == 3) {
-            st = 3;
-          }
-          //clave[cuntas] = st;
-          //cuntas++;
-          
-
-          if (cuntas == 7) {
-            // verificas so clave es igual a password
-            if (clave == password) {
-              pstrue = true;
-            } else {
-              pstrue = false;
-            }  if ( pstrue == true) {
-              Serial.println("correct password");
-              cuntas = 0;
-              bombState = BombStates::INIT;
-            } else if ( pstrue == false) {
-              Serial.println("incorrect password");
-              cuntas = 0;
+            if (evBtnsData == UP_BTN && btnpr == 1 ) {
+              clave[cuntas] = evBtnsData;
             }
-
+            else if (evBtnsData == DOWN_BTN && btnpr == 2 ) {
+              clave[cuntas] = evBtnsData;
+            }
+            else if (evBtnsData == ARM_BTN && btnpr == 3) {
+              clave[cuntas] = evBtnsData;
+            }
+            cuntas++;
           }
-          Serial.println(cuntas);
-          Serial.println(clave[cuntas]);
-          Serial.println(st);
-          Serial.println(evBtnsData);
+        }
+
+        else if (cuntas == zise) {
+          Serial.println("full password");
+          disarmBoom(clave, password, zise, &pstrue);
+          // verificas so clave es igual a password
+          if (pstrue == true) {
+            Serial.println("correct password");
+            display.display();
+            digitalWrite(LED_COUNT, LOW);
+            digitalWrite(LED_COUNT1, LOW);
+            digitalWrite(LED_COUNT2, LOW);
+            digitalWrite(LED_COUNT3, LOW);
+            display.clear();
+            display.drawString(10, 10, String("NICE"));
+            display.drawString(12, 30, String("JOB!"));
+            display.display();
+            delay(1500);
+            bombState = BombStates::INIT;
+            for ( uint8_t i = 0; i < zise; i++) {
+              clave[i] = 0;
+
+            }
+          }
+          else {
+            Serial.println("incorrect password");
+            cuntas = 0;
+            for (uint8_t j = 0; j < zise; j++) {
+              clave[j] = 0;
+            }
+          }
         }
 
         break;
@@ -298,12 +304,18 @@ void bombTask() {
 
     default:
       break;
-
-
   }
-
-
-
+}
+void disarmBoom(uint8_t *verClave, uint8_t *verPasswork, uint8_t vecZice, bool *compro) {
+  for (uint8_t i = 0; i < vecZice; i++) {
+    if (verPasswork[i] == verClave[i]) {
+      *compro = true;
+    }
+    else {
+      *compro = false;
+      break;
+    }
+  }
 }
 
 
