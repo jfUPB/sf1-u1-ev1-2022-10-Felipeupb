@@ -317,17 +317,3 @@ void disarmBoom(uint8_t *verClave, uint8_t *verPasswork, uint8_t vecZice, bool *
     }
   }
 }
-
-
-void serialTask() {
-  if (Serial.available() > 0) {
-    int dataIn = Serial.read();
-    if (dataIn == 'u') {
-      evBtns = true;
-      evBtnsData = UP_BTN;
-    } else if (dataIn == 'd') {
-      evBtns = true;
-      evBtnsData = DOWN_BTN;
-    }
-  }
-}
