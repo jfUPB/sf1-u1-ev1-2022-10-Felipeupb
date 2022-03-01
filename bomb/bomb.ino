@@ -210,7 +210,7 @@ void bombTask() {
         static uint8_t password[] = {1, 1, 2, 2, 1, 2, 3}; //UP,UP,DOWN, DOWN, UP, DOWN, ARM = 1122123
         static uint8_t st = 0;
         static uint8_t clave[7];
-        static uint8_t cuntas = 0;
+        static uint8_t cuntas = -1;
 
         static bool pstrue;
 
@@ -253,7 +253,11 @@ void bombTask() {
 
         if (evBtns == true) {
           evBtns = false;
+          Serial.println(clave[cuntas]);
 
+          clave[cuntas] = st;
+          cuntas++;
+          
           if (evBtnsData == UP_BTN && btnpr == 1 ) {
             st = 1;
           }
@@ -263,8 +267,10 @@ void bombTask() {
           else if (evBtnsData == ARM_BTN && btnpr == 3) {
             st = 3;
           }
-          clave[cuntas] = st;
-          cuntas++;
+          //clave[cuntas] = st;
+          //cuntas++;
+          
+
           if (cuntas == 7) {
             // verificas so clave es igual a password
             if (clave == password) {
